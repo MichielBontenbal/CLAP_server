@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Vibe Sound — Docs</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: #0d1017; color: #d7dce5;
+    min-height: 100dvh;
+    padding: 1.5rem 1.25rem 2.5rem;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+  header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 2rem; }
+  header a {
+    font-size: 0.8rem; color: #5b6373; text-decoration: none;
+    padding: 0.35rem 0.7rem; border: 1px solid #1e2840; border-radius: 7px;
+    background: #141d2e;
+  }
+  header a:hover { color: #d7dce5; border-color: #3a4254; }
+  h1 { font-size: 1.1rem; font-weight: 600; }
+  h1 span { color: #8b93a3; font-weight: 400; }
+  h2 {
+    font-size: 0.68rem; font-weight: 600; color: #5b6373;
+    text-transform: uppercase; letter-spacing: 0.07em;
+    margin: 2rem 0 0.6rem;
+  }
+  p { font-size: 0.9rem; line-height: 1.6; color: #b0b8c8; }
+  .labels { margin-top: 0.5rem; display: flex; flex-direction: column; gap: 0.3rem; }
+  .label {
+    font-size: 0.85rem; padding: 0.35rem 0.6rem;
+    background: #141d2e; border: 1px solid #1e2840;
+    border-radius: 6px; color: #d7dce5;
+  }
+  .cols { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.75rem; margin-top: 0.5rem; }
+  .col-head {
+    font-size: 0.65rem; font-weight: 600; color: #5b6373;
+    text-transform: uppercase; letter-spacing: 0.06em;
+    margin-bottom: 0.4rem;
+  }
+  .col-labels { display: flex; flex-direction: column; gap: 0.3rem; }
+</style>
+</head>
+<body>
+
+<header>
+  <a href="/mobile">&larr; Back</a>
+  <h1>Vibe Sound <span>— docs</span></h1>
+</header>
+
+<h2>How it works</h2>
+<p>Press <strong style="color:#d7dce5">Record</strong> on your phone to capture the sounds around you — up to 15 seconds. When you stop, the audio is sent from your phone to a server running a sound classification model. The server analyses the recording and returns the most likely sound categories for the soundscape you selected. Results and a mel spectrogram of the recording are shown directly on this page.</p>
+
+<h2>Urban Sound Classification</h2>
+<p>Urban sound classification is a branch of machine learning and environmental acoustics that automatically identifies sound events occurring in city and indoor environments. By analyzing short audio recordings, a classifier can detect sounds such as traffic, sirens, speech, and machinery, turning raw audio into structured labels. Applications range from noise pollution monitoring and smart city dashboards to accessibility tools and ecological research.</p>
+
+<h2>Mel Spectrogram</h2>
+<p>A mel spectrogram is a two-dimensional representation of an audio signal in which the horizontal axis shows time, the vertical axis shows frequency, and color encodes amplitude. The frequency axis follows the mel scale, which mimics the non-linear way the human ear perceives pitch — spacing lower frequencies further apart than higher ones. This perceptual scaling makes mel spectrograms well-suited as visual features for audio machine learning models, since they highlight the aspects of sound that matter most for human hearing.</p>
+
+<h2>CLAP Model</h2>
+<p>CLAP (Contrastive Language–Audio Pretraining) is a model developed by LAION that jointly embeds audio and text into a shared vector space, similar to how CLIP works for images and text. During zero-shot classification, the model compares the embedding of an incoming audio clip against embeddings of candidate text labels, and returns the best match — without requiring any labelled audio examples per class. This app uses the <code style="font-size:0.82rem;color:#7ec8e3;background:#141d2e;padding:0.1em 0.3em;border-radius:4px;">laion/larger_clap_general</code> checkpoint, trained on a large and diverse collection of audio–text pairs.</p>
+
+<h2>Soundscape Labels</h2>
+
+<div class="cols">
+  <div>
+    <div class="col-head">City</div>
+    <div class="col-labels">
+      <div class="label">Airco, air conditioning</div>
+      <div class="label">Airplane, aircraft, jet engine</div>
+      <div class="label">Alarm, car alarm, moped alarm</div>
+      <div class="label">Background noise</div>
+      <div class="label">Birds</div>
+      <div class="label">Car or traffic</div>
+      <div class="label">Church bell, chimes or clock</div>
+      <div class="label">Drilling</div>
+      <div class="label">Fountain</div>
+      <div class="label">Gunshot</div>
+      <div class="label">Helicopter</div>
+      <div class="label">Klaxon, hooter or car horn</div>
+      <div class="label">Moped</div>
+      <div class="label">Motorcycle</div>
+      <div class="label">Music, live music</div>
+      <div class="label">Silence, quiet</div>
+      <div class="label">Siren</div>
+      <div class="label">Talking and speaking</div>
+      <div class="label">Tram</div>
+      <div class="label">Train</div>
+      <div class="label">Wind blowing over microphone</div>
+    </div>
+  </div>
+  <div>
+    <div class="col-head">Home</div>
+    <div class="col-labels">
+      <div class="label">Airco, air conditioning</div>
+      <div class="label">Airplane, aircraft, jet engine</div>
+      <div class="label">Alarm, car alarm, moped alarm</div>
+      <div class="label">Background noise</div>
+      <div class="label">Car or traffic</div>
+      <div class="label">Church bell, chimes or clock</div>
+      <div class="label">Door slamming</div>
+      <div class="label">Helicopter</div>
+      <div class="label">Klaxon, hooter or car horn</div>
+      <div class="label">Moped</div>
+      <div class="label">Motorcycle</div>
+      <div class="label">Music, live music</div>
+      <div class="label">Silence, quiet</div>
+      <div class="label">Siren</div>
+      <div class="label">Talking and speaking</div>
+      <div class="label">Tram</div>
+      <div class="label">Walking on floor, footsteps</div>
+      <div class="label">Washing machine</div>
+    </div>
+  </div>
+  <div>
+    <div class="col-head">Marineterrein</div>
+    <div class="col-labels">
+      <div class="label">Airco, air conditioning</div>
+      <div class="label">Airplane, aircraft, jet engine</div>
+      <div class="label">Alarm, car alarm, moped alarm</div>
+      <div class="label">Background noise</div>
+      <div class="label">Birds</div>
+      <div class="label">Car or traffic</div>
+      <div class="label">Church bell, chimes or clock</div>
+      <div class="label">Klaxon, hooter or car horn</div>
+      <div class="label">Fountain</div>
+      <div class="label">Helicopter</div>
+      <div class="label">Moped</div>
+      <div class="label">Music, live music</div>
+      <div class="label">Silence, quiet</div>
+      <div class="label">Siren</div>
+      <div class="label">Thunderstorm</div>
+      <div class="label">Voices talking and speaking</div>
+      <div class="label">Wind blowing over microphone</div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

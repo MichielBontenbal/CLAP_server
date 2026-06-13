@@ -1,0 +1,34 @@
+[Unit]
+Description=Vibe Sound — CLAP audio classifier
+Documentation=https://github.com/sensemakersamsterdam/urbansounds2025
+After=network-online.target tailscaled.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=YOURUSER
+Group=YOURUSER
+WorkingDirectory=/home/YOURUSER/vibe_sound
+
+ExecStart=/home/YOURUSER/vibe_sound/.venv/bin/uvicorn clap_server:app \
+    --host 0.0.0.0 \
+    --port 8443 \
+    --ssl-certfile /home/YOURUSER/vibe_sound/certs/cert.pem \
+    --ssl-keyfile  /home/YOURUSER/vibe_sound/certs/key.pem
+
+Restart=on-failure
+RestartSec=10
+
+# Give the model time to load on first start
+TimeoutStartSec=120
+
+# Write logs to the systemd journal (journalctl -u vibe-sound -f)
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=vibe-sound
+
+# Limit recordings dir growth: optional, adjust as needed
+# LimitFSIZE=2G
+
+[Install]
+WantedBy=multi-user.target

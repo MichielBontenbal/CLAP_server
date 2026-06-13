@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Vibe Sound</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: #0d1017; color: #d7dce5;
+    min-height: 100dvh;
+    padding: 1.5rem 1.25rem 8rem;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+  h1 { font-size: 1.1rem; font-weight: 600; margin-bottom: 2rem; }
+  h1 span { color: #8b93a3; font-weight: 400; }
+
+  #record-btn {
+    display: block; width: 100%;
+    padding: 1rem; font: inherit; font-size: 1rem; font-weight: 600;
+    border-radius: 14px; border: none;
+    background: #36c46d; color: #06200f;
+    cursor: pointer; transition: background 0.15s, opacity 0.15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  #record-btn.recording { background: #c43636; color: #fff; }
+  #record-btn:disabled { opacity: 0.35; cursor: default; }
+
+  #status {
+    margin-top: 0.75rem; font-size: 0.85rem; color: #8b93a3;
+    min-height: 1.3em; text-align: center;
+  }
+
+  .soundscape-wrap { margin-top: 1.5rem; }
+  .soundscape-wrap > p {
+    font-size: 0.8rem; color: #8b93a3; margin-bottom: 0.6rem;
+  }
+  .soundscape-radio { display: flex; gap: 0.5rem; }
+  .radio-opt input { position: absolute; opacity: 0; width: 0; height: 0; }
+  .radio-opt span {
+    display: block; padding: 0.55rem 1.5rem;
+    border-radius: 8px; border: 1px solid #1e2840;
+    background: #141d2e; color: #8b93a3;
+    font-size: 0.85rem; font-weight: 500; cursor: pointer;
+    transition: background 0.12s, border-color 0.12s, color 0.12s;
+  }
+  .radio-opt input:checked + span {
+    border-color: #36c46d; color: #4ac16d; background: #0a1f12;
+  }
+
+  #classify-btn {
+    display: block; width: 100%; margin-top: 1rem;
+    padding: 0.9rem; font: inherit; font-size: 1rem; font-weight: 600;
+    border-radius: 14px; border: 1px solid #3a4254;
+    background: #1c2333; color: #e8ecf3;
+    cursor: pointer; -webkit-tap-highlight-color: transparent;
+    transition: background 0.12s, border-color 0.12s, color 0.12s, opacity 0.12s;
+  }
+  #classify-btn:not(:disabled) {
+    background: #0a1f12; border-color: #36c46d; color: #4ac16d;
+  }
+  #classify-btn:disabled { opacity: 0.35; cursor: default; }
+
+  .sh {
+    font-size: 0.68rem; font-weight: 600; color: #5b6373;
+    text-transform: uppercase; letter-spacing: 0.07em;
+    margin: 1.75rem 0 0.55rem;
+  }
+
+  table { width: 100%; border-collapse: collapse; }
+  th { text-align: left; color: #8b93a3; font-weight: 500; font-size: 0.78rem; padding-bottom: 0.3rem; }
+  td { padding: 0.35rem 0.5rem 0.35rem 0; font-size: 0.92rem; }
+  .score { font-variant-numeric: tabular-nums; color: #8b93a3; width: 3.5rem; }
+  .bar-cell { width: 50%; }
+  .bar { height: 0.65rem; border-radius: 3px; background: linear-gradient(90deg, #277f8e, #4ac16d); }
+
+  #spec-img { width: 100%; border-radius: 8px; display: block; }
+
+  #results-section, #spec-section { display: none; }
+
+  #live-spec-section { display: none; margin-top: 1.5rem; }
+  #live-spec-frame { width: 100%; height: 220px; border: 0; border-radius: 8px; display: block; }
+
+  #bottom-bar {
+    position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+    width: 100%; max-width: 480px;
+    padding: 0.5rem 1.25rem 1.5rem;
+    background: linear-gradient(transparent, #0d1017 35%);
+    display: flex; flex-direction: column; gap: 0.5rem;
+  }
+  #live-spec-btn {
+    display: block; width: 100%; padding: 0.65rem 1rem; border-radius: 10px;
+    border: 1px solid #1e2840; background: #141d2e;
+    color: #8b93a3; font-size: 0.85rem; font-weight: 500; font-family: inherit;
+    text-align: center; cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  #live-spec-btn.active { border-color: #36c46d; color: #4ac16d; background: #0a1f12; }
+  #info-link {
+    display: block; padding: 0.65rem 1rem; border-radius: 10px;
+    border: 1px solid #1e2840; background: #141d2e;
+    color: #8b93a3; font-size: 0.85rem; font-weight: 500;
+    text-align: center; text-decoration: none;
+  }
+</style>
+</head>
+<body>
+<h1>Vibe Sound <span>— classify sounds with your phone</span></h1>
+
+<button id="record-btn">Record</button>
+<div id="status">Tap to start recording</div>
+
+<div class="soundscape-wrap">
+  <p>Select your soundscape:</p>
+  <div class="soundscape-radio">
+    <label class="radio-opt"><input type="radio" name="soundscape" value="city" checked><span>City</span></label>
+    <label class="radio-opt"><input type="radio" name="soundscape" value="home"><span>Home</span></label>
+    <label class="radio-opt"><input type="radio" name="soundscape" value="marineterrein"><span>Marineterrein</span></label>
+  </div>
+</div>
+<button id="classify-btn" disabled>Classify</button>
+
+<div id="results-section">
+  <p class="sh">Classification</p>
+  <table id="result-table"></table>
+</div>
+
+<div id="spec-section">
+  <p class="sh">Mel spectrogram</p>
+  <img id="spec-img" alt="mel spectrogram">
+</div>
+
+<div id="live-spec-section">
+  <p class="sh">Live spectrogram</p>
+  <iframe id="live-spec-frame" src="" allow="microphone" title="live spectrogram"></iframe>
+</div>
+
+<div id="bottom-bar">
+  <button id="live-spec-btn">Live Spectrogram</button>
+  <a id="info-link" href="/info">Information</a>
+</div>
+
+<script>
+const btn          = document.getElementById('record-btn');
+const classifyBtn  = document.getElementById('classify-btn');
+const statusEl     = document.getElementById('status');
+const resultsSec   = document.getElementById('results-section');
+const specSec      = document.getElementById('spec-section');
+const table        = document.getElementById('result-table');
+const specImg      = document.getElementById('spec-img');
+
+const TARGET_SR = 48000;
+const MAX_SECONDS = 15;
+let mediaRecorder = null, chunks = [], recording = false;
+let lastPcm = null, lastDuration = 0;
+let autoStopTimer = null, autoStopped = false;
+let counterTimer = null, recordingStart = 0;
+
+btn.addEventListener('click', async () => {
+  if (recording) { clearTimeout(autoStopTimer); clearInterval(counterTimer); mediaRecorder.stop(); return; }
+
+  if (!navigator.mediaDevices) {
+    statusEl.textContent = 'Mic requires HTTPS. Open this page over https:// instead of http://.';
+    return;
+  }
+
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false }
+    });
+    chunks = [];
+    mediaRecorder = new MediaRecorder(stream);
+    mediaRecorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+    mediaRecorder.onstop = () => { stream.getTracks().forEach(t => t.stop()); decodeAudio(); };
+    mediaRecorder.start();
+
+    recording = true;
+    autoStopped = false;
+    recordingStart = Date.now();
+    btn.textContent = 'Stop';
+    btn.classList.add('recording');
+    statusEl.textContent = 'Recording for 0 sec';
+    counterTimer = setInterval(() => {
+      const elapsed = Math.floor((Date.now() - recordingStart) / 1000);
+      statusEl.textContent = `Recording for ${elapsed} sec`;
+    }, 1000);
+    resultsSec.style.display = 'none';
+    specSec.style.display = 'none';
+
+    autoStopTimer = setTimeout(() => {
+      if (recording) { autoStopped = true; clearInterval(counterTimer); mediaRecorder.stop(); }
+    }, MAX_SECONDS * 1000);
+  } catch (err) {
+    statusEl.textContent = err.message;
+  }
+});
+
+async function decodeAudio() {
+  recording = false;
+  clearInterval(counterTimer);
+  btn.textContent = 'Record';
+  btn.classList.remove('recording');
+  btn.disabled = true;
+  statusEl.textContent = 'Processing…';
+
+  try {
+    const blob = new Blob(chunks);
+    const arrayBuffer = await blob.arrayBuffer();
+    const audioCtx = new AudioContext();
+    const decoded = await audioCtx.decodeAudioData(arrayBuffer);
+    audioCtx.close();
+
+    const frames = Math.round(decoded.duration * TARGET_SR);
+    const offline = new OfflineAudioContext(1, frames, TARGET_SR);
+    const src = offline.createBufferSource();
+    src.buffer = decoded;
+    src.connect(offline.destination);
+    src.start();
+    const rendered = await offline.startRendering();
+    lastPcm = rendered.getChannelData(0);
+    lastDuration = decoded.duration;
+
+    statusEl.textContent = autoStopped
+      ? `Recording stopped after max ${MAX_SECONDS} seconds — select soundscape and classify.`
+      : `Recorded ${decoded.duration.toFixed(1)} s — select soundscape and classify.`;
+    classifyBtn.disabled = false;
+  } catch (err) {
+    statusEl.textContent = 'Error: ' + err.message;
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+classifyBtn.addEventListener('click', async () => {
+  if (!lastPcm) return;
+  const soundscape = document.querySelector('input[name="soundscape"]:checked').value;
+  classifyBtn.disabled = true;
+  btn.disabled = true;
+  statusEl.textContent = 'Classifying…';
+
+  try {
+    const resp = await fetch('/classify-audio?soundscape=' + soundscape, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/octet-stream' },
+      body: lastPcm.buffer
+    });
+    if (!resp.ok) throw new Error('Server error ' + resp.status);
+    const data = await resp.json();
+
+    table.innerHTML = '<tr><th>Label</th><th class="score">Score</th><th></th></tr>'
+      + data.results.map(r => {
+          const pct = (r.score * 100).toFixed(1);
+          return `<tr>
+            <td>${r.label}</td>
+            <td class="score">${r.score.toFixed(3)}</td>
+            <td class="bar-cell"><div class="bar" style="width:${pct}%"></div></td>
+          </tr>`;
+        }).join('');
+    resultsSec.style.display = 'block';
+
+    if (data.spectrogram) {
+      specImg.src = 'data:image/png;base64,' + data.spectrogram;
+      specSec.style.display = 'block';
+    }
+
+    statusEl.textContent = 'Classified ' + lastDuration.toFixed(1) + ' s of audio.';
+  } catch (err) {
+    statusEl.textContent = 'Error: ' + err.message;
+  } finally {
+    classifyBtn.disabled = false;
+    btn.disabled = false;
+  }
+});
+
+const liveSpecBtn   = document.getElementById('live-spec-btn');
+const liveSpecSec   = document.getElementById('live-spec-section');
+const liveSpecFrame = document.getElementById('live-spec-frame');
+
+liveSpecBtn.addEventListener('click', () => {
+  const active = liveSpecBtn.classList.toggle('active');
+  if (active) {
+    liveSpecFrame.src = '/spectrogram';
+    liveSpecSec.style.display = 'block';
+    liveSpecBtn.textContent = 'Stop';
+  } else {
+    liveSpecFrame.src = '';
+    liveSpecSec.style.display = 'none';
+    liveSpecBtn.textContent = 'Live Spectrogram';
+  }
+});
+</script>
+</body>
+</html>
