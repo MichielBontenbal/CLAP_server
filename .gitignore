@@ -5,3 +5,4 @@ __pycache__/
 recordings/
 certs/
 .DS_Store
+.claude/
